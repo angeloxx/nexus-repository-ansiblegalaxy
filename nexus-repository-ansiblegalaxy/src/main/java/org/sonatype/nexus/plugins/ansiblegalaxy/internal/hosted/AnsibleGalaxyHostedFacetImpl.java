@@ -18,9 +18,6 @@ import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.search.ElasticSearchService;
 import org.sonatype.nexus.repository.search.SearchService;
 import org.sonatype.nexus.repository.storage.*;
-import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
-import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
-import org.sonatype.nexus.repository.transaction.TransactionalTouchMetadata;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.ContentTypes;
 import org.sonatype.nexus.repository.view.Context;
@@ -28,6 +25,7 @@ import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.payloads.BytesPayload;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
+import org.sonatype.nexus.transaction.Transactional;
 import org.sonatype.nexus.transaction.UnitOfWork;
 
 import javax.inject.Inject;
@@ -89,7 +87,7 @@ public class AnsibleGalaxyHostedFacetImpl
         this.sorting.add(SortBuilders.fieldSort(P_VERSION).order(SortOrder.ASC));
     }
 
-    @TransactionalTouchBlob
+    @Transactional
     @Override
     public Content get(final String path) {
 
@@ -143,7 +141,7 @@ public class AnsibleGalaxyHostedFacetImpl
     }
 
     @Override
-    @TransactionalTouchMetadata
+    @Transactional
     public Content searchVersionsByName(final Context context, String user, String module) {
         StorageTx tx = UnitOfWork.currentTx();
 
@@ -186,7 +184,7 @@ public class AnsibleGalaxyHostedFacetImpl
     }
 
     @Override
-    @TransactionalTouchMetadata
+    @Transactional
     public Content moduleByNameAndVersion(Context context, String user, String module, String version) {
 
         StorageTx tx = UnitOfWork.currentTx();
@@ -227,7 +225,7 @@ public class AnsibleGalaxyHostedFacetImpl
     }
 
 
-    @TransactionalStoreBlob
+    @Transactional
     protected Content storeModule(final String path,
                                   final TempBlob moduleContent,
                                   final Payload payload) throws IOException {

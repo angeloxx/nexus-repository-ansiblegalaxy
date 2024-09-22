@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.sonatype.nexus.plugins</groupId>
     <artifactId>nexus-repository-ansiblegalaxy-parent</artifactId>
-    <version>0.3.3</version>
+    <version>0.4.0</version>
   </parent>
 
   <artifactId>nexus-repository-ansiblegalaxy</artifactId>
@@ -68,6 +68,10 @@
       <version>3.12.4</version>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>org.sonatype.nexus.plugins</groupId>
+          <artifactId>nexus-repository-maven</artifactId>
+      </dependency>
 
   </dependencies>
 

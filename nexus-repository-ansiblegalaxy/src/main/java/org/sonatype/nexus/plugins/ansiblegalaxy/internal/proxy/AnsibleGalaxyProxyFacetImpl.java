@@ -34,8 +34,7 @@ import org.sonatype.nexus.repository.proxy.ProxyFacetSupport;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.StorageFacet;
 import org.sonatype.nexus.repository.storage.StorageTx;
-import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
-import org.sonatype.nexus.repository.transaction.TransactionalTouchMetadata;
+import org.sonatype.nexus.transaction.Transactional;
 import org.sonatype.nexus.repository.view.*;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
@@ -134,7 +133,7 @@ public class AnsibleGalaxyProxyFacetImpl
         }
     }
 
-    @TransactionalTouchBlob
+    @Transactional
     public Content getAsset(final String assetPath) {
         StorageTx tx = UnitOfWork.currentTx();
 
@@ -298,7 +297,7 @@ public class AnsibleGalaxyProxyFacetImpl
         setCacheInfo(content, cacheInfo);
     }
 
-    @TransactionalTouchMetadata
+    @Transactional
     public void setCacheInfo(final Content content, final CacheInfo cacheInfo) throws IOException {
         StorageTx tx = UnitOfWork.currentTx();
         Asset asset = Content.findAsset(tx, tx.findBucket(getRepository()), content);

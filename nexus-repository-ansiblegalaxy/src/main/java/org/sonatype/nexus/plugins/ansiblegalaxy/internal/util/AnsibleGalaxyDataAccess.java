@@ -23,7 +23,7 @@ import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyA
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.search.SearchRequest;
 import org.sonatype.nexus.repository.storage.*;
-import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
+import org.sonatype.nexus.transaction.Transactional;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.payloads.BlobPayload;
@@ -50,6 +50,10 @@ public class AnsibleGalaxyDataAccess {
 
     private final Logger log = Loggers.getLogger(getClass());
 
+
+    private AnsibleGalaxyDataAccess() {
+    }
+
     /**
      * Find an asset by its name.
      *
@@ -65,7 +69,7 @@ public class AnsibleGalaxyDataAccess {
      *
      * @return blob content
      */
-    @TransactionalStoreBlob
+    @Transactional
     public Content maybeCreateAndSaveAsset(
             final Repository repository,
             final String assetPath,
@@ -132,7 +136,7 @@ public class AnsibleGalaxyDataAccess {
         return content;
     }
 
-    @TransactionalStoreBlob
+    @Transactional
     public Content maybeCreateAndSaveComponent(
             final Repository repository,
             final AnsibleGalaxyAttributes ansibleGalaxyAttributes,

@@ -23,7 +23,7 @@ import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.QueryTokenMatcher
 import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.RecipeSupport
 import org.sonatype.nexus.repository.Type
-import org.sonatype.nexus.repository.attributes.AttributesFacet
+// import org.sonatype.nexus.repository.attributes.AttributesFacet
 import org.sonatype.nexus.repository.cache.NegativeCacheFacet
 import org.sonatype.nexus.repository.cache.NegativeCacheHandler
 import org.sonatype.nexus.repository.http.PartialFetchHandler
@@ -72,8 +72,8 @@ abstract class AnsibleGalaxyRecipeSupport
     public Provider<ElasticSearchFacet> searchFacet
 
     //not in example
-    @Inject
-    public Provider<AttributesFacet> attributesFacet
+    // @Inject
+    // public Provider<AttributesFacet> attributesFacet
 
     @Inject
     public ExceptionHandler exceptionHandler
