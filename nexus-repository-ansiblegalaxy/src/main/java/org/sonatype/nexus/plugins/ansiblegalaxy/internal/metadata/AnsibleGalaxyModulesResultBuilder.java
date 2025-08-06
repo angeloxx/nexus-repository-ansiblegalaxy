@@ -13,7 +13,8 @@
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata;
 
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils;
-import org.sonatype.nexus.repository.storage.Asset;
+import org.sonatype.nexus.repository.content.fluent.FluentAsset;
+import org.sonatype.nexus.repository.content.fluent.FluentComponent;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,44 +32,25 @@ public class AnsibleGalaxyModulesResultBuilder {
         this.ansibleGalaxyPathUtils = ansibleGalaxyPathUtils;
     }
 
-    public AnsibleGalaxyModulesResult parse(final Asset asset, String baseUrlRepo) {
+    public AnsibleGalaxyModulesResult parse(final FluentAsset asset, String baseUrlRepo) {
         AnsibleGalaxyModulesResult result = new AnsibleGalaxyModulesResult();
-        result.setHref(this.ansibleGalaxyPathUtils.parseHref(baseUrlRepo, asset.attributes().child("ansiblegalaxy").get("name").toString(), asset.attributes().child("ansiblegalaxy").get("version").toString()));
-        result.setVersion(asset.attributes().child("ansiblegalaxy").get("version").toString());
+        
+        // Get component information if available
+        FluentComponent component = (FluentComponent) asset.component().orElse(null);
+        if (component != null) {
+            String name = component.namespace() + "-" + component.name();
+            String version = component.version();
+            
+            result.setHref(this.ansibleGalaxyPathUtils.parseHref(baseUrlRepo, name, version));
+            result.setVersion(version);
+        } else {
+            // Fallback to parsing from path
+            String path = asset.path();
+            String version = "1.0.0"; // default version
+            result.setHref(path);
+            result.setVersion(version);
+        }
 
         return result;
     }
-
-
-//
-//  private AnsibleGalaxyAttributes parseMetadata(final Asset asset) {
-//
-//    NestedAttributesMap attributes = asset.formatAttributes();
-//
-//    AnsibleGalaxyAttributes metadata = new AnsibleGalaxyAttributes(attributes.get("group").toString(), attributes.get("name").toString(), attributes.get("version").toString());
-//
-//    if (attributes.get("description") != null) {
-//      metadata.setDescription(attributes.get("description").toString());
-//    }
-//
-//    if (attributes.get("dependencies") != null) {
-//      Object dependenciesObj = attributes.get("dependencies");
-//      checkState(dependenciesObj instanceof Map, "dependencies must be a 'child'");
-//      Map dependencies = (Map) dependenciesObj;
-//
-//      List<AnsibleGalaxyDependencyAttributes> moduleDependencies = new ArrayList<>(dependencies.keySet().size());
-//      for (Object dependencyName : dependencies.keySet()) {
-//        if (dependencies.get(dependencyName) != null) {
-//          moduleDependencies.add(new AnsibleGalaxyDependencyAttributes(dependencyName.toString(),
-//                  dependencies.get(dependencyName).toString()));
-//        }
-//      }
-//      metadata.setDependencies(moduleDependencies);
-//    }
-//    else {
-//      metadata.setDependencies(Collections.emptyList());
-//    }
-//
-//    return metadata;
-//  }
 }

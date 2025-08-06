@@ -1,8 +1,10 @@
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.hosted
 
+import org.sonatype.nexus.common.upgrade.AvailabilityVersion
 import org.sonatype.nexus.plugins.ansiblegalaxy.AnsibleGalaxyFormat
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.AnsibleGalaxyRecipeSupport
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.AnsibleGalaxyContentFacet
 import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
@@ -25,6 +27,7 @@ import javax.inject.Singleton
  *
  * @since 0.0.2
  */
+@AvailabilityVersion(from = "1.0")
 @Named(AnsibleGalaxyHostedRecipe.NAME)
 @Singleton
 class AnsibleGalaxyHostedRecipe
@@ -33,16 +36,19 @@ class AnsibleGalaxyHostedRecipe
 
     private final HostedHandlers hostedHandlers
     private final Provider<AnsibleGalaxyHostedFacet> hostedFacet
+    private final Provider<AnsibleGalaxyContentFacet> contentFacet
 
     @Inject
     AnsibleGalaxyHostedRecipe(
             final Provider<AnsibleGalaxyHostedFacet> hostedFacet,
+            final Provider<AnsibleGalaxyContentFacet> contentFacet,
             final HostedHandlers hostedHandlers,
             @Named(HostedType.NAME) final Type type,
             @Named(AnsibleGalaxyFormat.NAME) final Format format
     ) {
         super(type, format)
         this.hostedFacet = hostedFacet
+        this.contentFacet = contentFacet
         this.hostedHandlers = hostedHandlers
     }
 
@@ -52,10 +58,8 @@ class AnsibleGalaxyHostedRecipe
         repository.attach(configure(viewFacet.get()))
         repository.attach(httpClientFacet.get())
         repository.attach(componentMaintenanceFacet.get())
-        repository.attach(storageFacet.get())
+        repository.attach(contentFacet.get())
         repository.attach(hostedFacet.get())
-        repository.attach(searchFacet.get())
-        repository.attach(attributesFacet.get())
     }
 
     /**
@@ -72,7 +76,6 @@ class AnsibleGalaxyHostedRecipe
                 .handler(conditionalRequestHandler)
                 .handler(partialFetchHandler)
                 .handler(contentHeadersHandler)
-                .handler(unitOfWorkHandler)
                 .handler(hostedHandlers.api)
                 .create())
 
@@ -84,7 +87,6 @@ class AnsibleGalaxyHostedRecipe
                 .handler(conditionalRequestHandler)
                 .handler(partialFetchHandler)
                 .handler(contentHeadersHandler)
-                .handler(unitOfWorkHandler)
                 .handler(hostedHandlers.collectionDetail)
                 .create())
 
@@ -96,7 +98,6 @@ class AnsibleGalaxyHostedRecipe
                 .handler(conditionalRequestHandler)
                 .handler(partialFetchHandler)
                 .handler(contentHeadersHandler)
-                .handler(unitOfWorkHandler)
                 .handler(hostedHandlers.collectionVersionList)
                 .create())
 
@@ -108,10 +109,8 @@ class AnsibleGalaxyHostedRecipe
                 .handler(conditionalRequestHandler)
                 .handler(partialFetchHandler)
                 .handler(contentHeadersHandler)
-                .handler(unitOfWorkHandler)
                 .handler(hostedHandlers.collectionVersionDetail)
                 .create())
-
 
         builder.route(new Route.Builder().matcher(collectionArtifactMatcher())
                 .handler(timingHandler)
@@ -121,7 +120,6 @@ class AnsibleGalaxyHostedRecipe
                 .handler(conditionalRequestHandler)
                 .handler(partialFetchHandler)
                 .handler(contentHeadersHandler)
-                .handler(unitOfWorkHandler)
                 .handler(hostedHandlers)
                 .create())
 
@@ -133,7 +131,6 @@ class AnsibleGalaxyHostedRecipe
                 .handler(conditionalRequestHandler)
                 .handler(partialFetchHandler)
                 .handler(contentHeadersHandler)
-                .handler(unitOfWorkHandler)
                 .handler(hostedHandlers)
                 .create())
 
@@ -145,7 +142,6 @@ class AnsibleGalaxyHostedRecipe
                 .handler(conditionalRequestHandler)
                 .handler(partialFetchHandler)
                 .handler(contentHeadersHandler)
-                .handler(unitOfWorkHandler)
                 .handler(hostedHandlers)
                 .create())
 
@@ -158,8 +154,7 @@ class AnsibleGalaxyHostedRecipe
 //                .handler(conditionalRequestHandler)
 //                .handler(partialFetchHandler)
 //                .handler(contentHeadersHandler)
-//                .handler(unitOfWorkHandler)
-//                .handler(hostedHandlers.moduleByNameAndVersion)
+////                .handler(hostedHandlers.moduleByNameAndVersion)
 //                .create());
 //
 //        builder.route(new Route.Builder()

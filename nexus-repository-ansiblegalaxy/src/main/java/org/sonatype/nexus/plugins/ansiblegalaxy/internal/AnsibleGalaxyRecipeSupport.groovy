@@ -23,18 +23,14 @@ import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.QueryTokenMatcher
 import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.RecipeSupport
 import org.sonatype.nexus.repository.Type
-import org.sonatype.nexus.repository.attributes.AttributesFacet
 import org.sonatype.nexus.repository.cache.NegativeCacheFacet
 import org.sonatype.nexus.repository.cache.NegativeCacheHandler
 import org.sonatype.nexus.repository.http.PartialFetchHandler
 import org.sonatype.nexus.repository.httpclient.HttpClientFacet
 import org.sonatype.nexus.repository.purge.PurgeUnusedFacet
 import org.sonatype.nexus.repository.routing.RoutingRuleHandler
-import org.sonatype.nexus.repository.search.ElasticSearchFacet
 import org.sonatype.nexus.repository.security.SecurityHandler
-import org.sonatype.nexus.repository.storage.DefaultComponentMaintenanceImpl
-import org.sonatype.nexus.repository.storage.StorageFacet
-import org.sonatype.nexus.repository.storage.UnitOfWorkHandler
+import org.sonatype.nexus.repository.content.maintenance.ContentMaintenanceFacet
 import org.sonatype.nexus.repository.view.ConfigurableViewFacet
 import org.sonatype.nexus.repository.view.Context
 import org.sonatype.nexus.repository.view.Matcher
@@ -63,17 +59,8 @@ abstract class AnsibleGalaxyRecipeSupport
     @Inject
     public Provider<ConfigurableViewFacet> viewFacet
 
-    //not in example
-    @Inject
-    public Provider<StorageFacet> storageFacet
 
-    //not in example
-    @Inject
-    public Provider<ElasticSearchFacet> searchFacet
 
-    //not in example
-    @Inject
-    public Provider<AttributesFacet> attributesFacet
 
     @Inject
     public ExceptionHandler exceptionHandler
@@ -96,14 +83,12 @@ abstract class AnsibleGalaxyRecipeSupport
     @Inject
     public ContentHeadersHandler contentHeadersHandler
 
-    @Inject
-    public UnitOfWorkHandler unitOfWorkHandler
 
     @Inject
     public HandlerContributor handlerContributor
 
     @Inject
-    public Provider<DefaultComponentMaintenanceImpl> componentMaintenanceFacet
+    public Provider<ContentMaintenanceFacet> componentMaintenanceFacet
 
     @Inject
     public Provider<HttpClientFacet> httpClientFacet
@@ -151,6 +136,14 @@ abstract class AnsibleGalaxyRecipeSupport
                 setAssetKind(AssetKind.COLLECTION_VERSION_LIST)
         )
     }
+    // /api/v3/plugin/ansible/content/published/collections/index/ansible/netcommon/versions/
+    static Matcher collectionVersionListMatcherPages() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new QueryTokenMatcher("/api/{apiversion}/plugin/ansible/content/published/collections/index/{author}/{module}/versions/", [limit: "limit", offset: "offset"]),
+                setAssetKind(AssetKind.COLLECTION_VERSION_LIST_LIMIT)
+        )
+    }
 
     static Matcher collectionVersionDetailMatcher() {
         LogicMatchers.and(
@@ -163,15 +156,25 @@ abstract class AnsibleGalaxyRecipeSupport
     static Matcher collectionArtifactMatcher() {
         LogicMatchers.and(
                 new ActionMatcher(GET, HEAD),
+                new TokenMatcher("/api/{apiversion}/plugin/ansible/content/published/collections/artifacts/{author}-{module}-{version}.tar.gz"),
+                setAssetKind(AssetKind.COLLECTION_ARTIFACT)
+        )
+    }
+
+    static Matcher collectionArtifactV2Matcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
                 new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
                 setAssetKind(AssetKind.COLLECTION_ARTIFACT)
         )
     }
 
+    // https://repo.angeloxx.lan/repository/galaxy/api/v3/plugin/ansible/content/published/collections/artifacts/telekom_mms-icinga_director-1.34.1.tar.gz
+    // /api/v3/plugin/ansible/content/published/collections/artifacts/telekom_mms-icinga_director-1.34.1.tar.gz
     static Matcher collectionArtifactIhmMatcher() {
         LogicMatchers.and(
                 new ActionMatcher(GET, HEAD),
-                new TokenMatcher("/collection/{author}/{module}/{version}/{author}-{module}-{version}.tar.gz"),
+                new TokenMatcher("/api/{apiversion}/plugin/ansible/content/published/collections/artifacts/{author}-{module}-{version}.tar.gz"),
                 setAssetKind(AssetKind.COLLECTION_ARTIFACT)
         )
     }

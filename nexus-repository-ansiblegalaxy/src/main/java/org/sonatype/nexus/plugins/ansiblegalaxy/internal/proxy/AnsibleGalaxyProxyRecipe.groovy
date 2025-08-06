@@ -12,8 +12,10 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy
 
+import org.sonatype.nexus.common.upgrade.AvailabilityVersion
 import org.sonatype.nexus.plugins.ansiblegalaxy.AnsibleGalaxyFormat
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.AnsibleGalaxyRecipeSupport
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.AnsibleGalaxyContentFacet
 import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
@@ -35,6 +37,7 @@ import javax.inject.Singleton
  * AnsibleGalaxy proxy repository recipe.
  * @since 0.0.1
  */
+@AvailabilityVersion(from = "1.0")
 @Named(AnsibleGalaxyProxyRecipe.NAME)
 @Singleton
 class AnsibleGalaxyProxyRecipe
@@ -43,6 +46,9 @@ class AnsibleGalaxyProxyRecipe
 
     @Inject
     Provider<AnsibleGalaxyProxyFacetImpl> proxyFacet
+    
+    @Inject
+    Provider<AnsibleGalaxyContentFacet> contentFacet
 
     @Inject
     ProxyHandler proxyHandler
@@ -60,11 +66,9 @@ class AnsibleGalaxyProxyRecipe
         repository.attach(httpClientFacet.get())
         repository.attach(negativeCacheFacet.get())
         repository.attach(componentMaintenanceFacet.get())
+        repository.attach(contentFacet.get())
         repository.attach(proxyFacet.get())
-        repository.attach(storageFacet.get())
-        repository.attach(searchFacet.get())
         repository.attach(purgeUnusedFacet.get())
-        repository.attach(attributesFacet.get())
     }
 
     /**
@@ -77,8 +81,10 @@ class AnsibleGalaxyProxyRecipe
                 apiInternalsMatcher(),
                 collectionDetailMatcher(),
                 collectionVersionListMatcher(),
+                collectionVersionListMatcherPages(),
                 collectionVersionDetailMatcher(),
                 collectionArtifactMatcher(),
+                collectionArtifactV2Matcher(),
                 collectionArtifactIhmMatcher(),
                 roleSearchMatcher(),
                 roleDetailMatcher(),
@@ -95,7 +101,6 @@ class AnsibleGalaxyProxyRecipe
                     .handler(partialFetchHandler)
                     .handler(contentHeadersHandler)
                     .handler(conditionalRequestHandler)
-                    .handler(unitOfWorkHandler)
                     .handler(lastDownloadedHandler)
                     .handler(proxyHandler)
                     .create())
